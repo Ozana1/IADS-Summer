@@ -2,7 +2,7 @@
 
 This is Big Data demo project!
 
-*list
+* list
 * 1
 * 2
 * 3
