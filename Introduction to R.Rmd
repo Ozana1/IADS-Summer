@@ -1,0 +1,281 @@
+---
+title: "Exercises"
+author: "Simon Parker"
+date: "19 July 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exercise 1
+
+```{r}
+a = 1
+```
+
+Did anything happen? We can check by typing in `a` to see if `R` returns the value `1`.
+
+```{r}
+a # Click "Run" or the green triangle or hit "Ctrl + Enter"
+```
+
+Now, since `a` is a *variable*, we can replace its value by assigning it a new value.
+
+```{r}
+a = "Boo!"
+a # 'a' no longer returns the value 1.
+```
+
+#Exercise 2
+### Vectors
+To create a vector, we can `c`ombine or `c`oncatenate values as follows:
+```{r}
+## Numeric Vector
+c(1, 2)
+1:2
+```
+```{r}
+## Character Vector
+c("Alice", "Bob", "Cat")
+c("A", "B", "C")
+LETTERS[c(1, 2, 3)]
+LETTERS[1:3]
+letters[1:3]
+```
+```{r}
+## Logical Vector
+c(TRUE, FALSE)
+c(1, 2)[c(TRUE, FALSE)]
+```
+
+
+## Question: Explain what is going on in the code below:
+
+```{r}
+c(1, "A") 
+c(1, 2, 3, 4)[c(TRUE, FALSE)]
+c(1, 2, 3, 4)[c(TRUE, FALSE, TRUE, FALSE)]
+
+```
+
+### Matrices
+```{r}
+## Numeric Matrix
+i = 1:6
+matrix(i, nrow = 3)
+matrix(i, nrow = 2, ncol = 3)
+matrix(i, ncol = 2)
+cbind(1:3, 4:6)                  # column bind
+rbind(c(1, 4), c(2, 5), c(3, 6)) # row bind
+```
+```{r}
+## Character Matrix
+matrix(LETTERS[i], nrow = 3)
+matrix(i, nc = 2, byrow = TRUE)
+```
+
+### Lists
+```{r}
+x1 = list(1, "Alice")
+x1
+x2 = list(TRUE, 2, "Bob")
+x2
+x3 = list(x1, x2)
+x3
+```
+
+### Data Frames
+```{r}
+x1 = 1:3
+x2 = LETTERS[x1]
+x3 = data.frame(id = x1, cat = x2)
+x3
+data.frame(x3, x3)
+data.frame(x3, x3, x3)
+data.frame(list(a = x1, b = x2))
+```
+
+### Checking Types
+```{r}
+is.numeric(1:10)
+is.numeric(c("A", "B"))
+is.data.frame(matrix(1:10, nrow = 2))
+is.matrix(data.frame(1:10, 2:11))
+is.list(matrix(1:10, ncol = 2))
+```
+
+## Question: is a data.frame a list?
+
+
+
+## Question: is a list a data.frame?
+
+
+
+# Exercise 3
+
+```{r}
+
+greet_student = function(name) {
+  print(paste0("Hello, ",
+              name,
+              "! ",
+              "Welcome to Encounters with Big Data 2018!"))
+}
+
+```
+```{r}
+
+student_names = c("Simon", "Deborah", "Myles", "Louise", "Jason Isaacs")
+```
+```{r}
+sapply(student_names, greet_student)
+```
+
+# Exercise 4
+
+```{r}
+f = function(n) {
+  `*` = `/`
+  n * n
+}
+
+f(2)
+
+2 * 2
+```
+
+# Exercise 5
+
+## Memory limits
+
+```{r}
+memory.limit()
+```
+Let's try and hit our memory limit by simulating a large matrix.
+```{r}
+## Simulate a large matrix.
+zero_mat = matrix(0, 1e7, ncol = 10)
+dim(zero_mat)
+print(object.size(zero_mat), unit = "Gb")
+print(str(zero_mat))
+rm(zero_mat)
+```
+
+This time, we simulate a large matrix of *integer* values.
+```{r}
+## Simulate a large integer matrix.
+int_mat = matrix(as.integer(0), 1e+7, ncol = 10)
+dim(int_mat)
+print(object.size(int_mat), unit = "Gb")
+print(str(int_mat))
+rm(int_mat)
+```
+
+### Why do these matrices have the same dimensions but have different file sizes? 
+
+## Copying
+```{r}
+## We create a data frame consisting of 2 million random integers.
+## Imagine that these are counts the number of steps people have
+## taken across two days.
+day1 = sample(9000:20000, 1e6, replace = TRUE)
+day2 = sample(9000:20000, 1e6, replace = TRUE)
+steps = data.frame(day1, day2)
+head(steps)
+
+## Suppose that there was a fault in the collection device and we need
+## to increment the first 1000 counts for both days.
+m = 1000
+
+## Data frame way.
+x <- system.time({
+  for (i in 1:m) {
+    steps[i, ] = steps[i, ] + 1
+  }
+})
+
+## Vector way. This offloads the update process down to C code, so
+## the copying is under control.
+y <- system.time({
+  for (i in 1:m) {
+    day1[i] = day1[i] + 1
+    day2[i] = day2[i] + 1
+  }
+  steps2 = data.frame(day1, day2)
+})
+
+identical(steps, steps2)
+
+x
+y
+
+```
+
+# Exercise 6
+
+Create a dataset using the nycflights13 data that only contains columns that start with 'arr' and end with 'delay'.
+
+Hint: You may need to 'library' dplyr and nycflights13 first; the "starts_with" and "ends_with" commands may also be helpful
+
+```{r}
+
+```
+
+# Exercise 7
+
+```{r}
+
+```
+
+# Exercise 8
+
+```{r}
+
+```
+
+# Exercise 10
+
+```{r}
+
+```
+
+Spark demo
+
+```{r}
+library(sparklyr)
+library(dplyr)
+library(nycflights13)
+library(ggplot2)
+
+sc <- spark_connect(master="local")
+flights <- copy_to(sc, flights, "flights", overwrite = T)
+airlines <- copy_to(sc, airlines, "airlines", overwrite = T)
+planes <- copy_to(sc, planes, "planes", overwrite = T)
+weather <- copy_to(sc, weather, "weather", overwrite= T)
+
+src_tbls(sc)
+```
+
+Now our flights and airlines data can be worked on, without being copied to memory. This makes it possible to work with large datasets.
+
+We can then use dplyr commands that we have already seen without using up our memory.
+```{r}
+flights %>%
+  inner_join(airlines, by = "carrier") %>%
+  inner_join(planes, by = "tailnum")
+  
+```
+
+When we want to work on the data for plotting and analysis we have to use the collect() command. This will bring the data into R.
+
+```{r}
+cleandata = flights %>% 
+  select(dest, dep_delay, month, day) %>%
+  na.omit() %>%
+  collect()
+```
+
+Now we have a cleaned datset we can start working on.
